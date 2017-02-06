@@ -11,5 +11,5 @@ services:
      - "22"
     ports:
      - "2224:22/tcp"
-    image: "dspsr"
+    image: "mpifrpsr/dspsr"
     command: "/usr/sbin/sshd -D"
