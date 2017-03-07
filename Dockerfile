@@ -5,7 +5,7 @@
 # as you do not remove the above attribution and reasonably
 # inform receipients that you have modified the original work.
 
-FROM ubuntu:16.04
+FROM nvidia/cuda:8.0-runtime-ubuntu16.04
 
 MAINTAINER Ewan Barr "ebarr@mpifr-bonn.mpg.de"
 
@@ -46,6 +46,8 @@ RUN apt-get --no-install-recommends -y install \
     gfortran \
     wget \
     git \
+    expect \	
+    cvs \
     libcfitsio-dev \
     pgplot5 \
     swig2.0 \    
@@ -192,9 +194,6 @@ RUN echo "Predictor::default = tempo2" >> .psrchive.cfg && \
 WORKDIR $PSRHOME
 COPY psrdada_cvs_login $PSRHOME
 USER root
-RUN apt-get -y update  &&  apt-get --no-install-recommends -y install \
-    expect \
-    cvs  
 RUN chown -R psr:psr psrdada_cvs_login && \
     chmod +x psrdada_cvs_login
 USER psr
