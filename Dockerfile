@@ -170,11 +170,6 @@ RUN ./bootstrap && \
     make install && \
     make plugins-install && \
     rm -rf .git
-WORKDIR $PSRHOME/tempo2/T2runtime/observatory
-RUN mv observatories.dat observatories.dat_ORIGINAL && \
-    mv aliases aliases_ORIGINAL && \
-    wget https://raw.githubusercontent.com/mserylak/pulsar_docker/master/tempo2/observatories.dat && \
-    wget https://raw.githubusercontent.com/mserylak/pulsar_docker/master/tempo2/aliases
 
 # PSRCHIVE
 ENV PSRCHIVE $PSRHOME/psrchive
@@ -190,7 +185,35 @@ RUN ./bootstrap && \
     make install && \
     rm -rf .git
 WORKDIR $HOME
-RUN wget https://raw.githubusercontent.com/mserylak/pulsar_docker/master/psrchive/.psrchive.cfg
+RUN echo "Predictor::default = tempo2" >> .psrchive.cfg && \
+    echo "Predictor::policy = default" >> .psrchive.cfg
+
+# PSRDADA
+WORKDIR $PSRHOME
+COPY psrdada_cvs_login $PSRHOME
+USER root
+RUN apt-get -y update  &&  apt-get --no-install-recommends -y install \
+    expect \
+    cvs  
+RUN chown -R psr:psr psrdada_cvs_login && \
+    chmod +x psrdada_cvs_login
+USER psr
+RUN ls -lrt psrdada_cvs_login && \
+    chmod +x psrdada_cvs_login && \
+    ./psrdada_cvs_login && \
+    cvs -z3 -d:pserver:anonymous@psrdada.cvs.sourceforge.net:/cvsroot/psrdada co -P psrdada
+ENV PSRDADA_HOME $PSRHOME/psrdada
+WORKDIR $PSRDADA_HOME
+RUN mkdir build/ && \
+    ./bootstrap && \
+    ./configure --prefix=$PSRDADA_HOME/build && \
+    echo " dada" >> backends.list && \
+    make && \
+    make install && \
+    make clean 
+ENV PATH $PATH:$PSRDADA_HOME/build/bin
+ENV PSRDADA_BUILD $PSRDADA_HOME/build/
+ENV PACKAGES $PSRDADA_BUILD
 
 # DSPSR
 ENV DSPSR $PSRHOME/dspsr
