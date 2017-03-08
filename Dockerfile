@@ -206,7 +206,6 @@ WORKDIR $PSRDADA_HOME
 RUN mkdir build/ && \
     ./bootstrap && \
     ./configure --prefix=$PSRDADA_HOME/build && \
-    echo " dada" >> backends.list && \
     make && \
     make install && \
     make clean 
@@ -221,7 +220,7 @@ ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$DSPSR/install/lib
 ENV C_INCLUDE_PATH $C_INCLUDE_PATH:$DSPSR/install/include
 WORKDIR $DSPSR
 RUN ./bootstrap && \
-    echo "apsr asp bcpm bpsr caspsr cpsr cpsr2 dummy fits kat lbadr lbadr64 lofar_dal lump lwa puma2 sigproc ska1" > backends.list && \
+    echo "apsr asp bcpm bpsr caspsr cpsr cpsr2 dummy fits kat lbadr lbadr64 lofar_dal lump lwa puma2 sigproc ska1 dada" > backends.list && \
     ./configure --prefix=$DSPSR/install --x-libraries=/usr/lib/x86_64-linux-gnu CPPFLAGS="-I"$DAL"/install/include -I/usr/include/hdf5/serial" LDFLAGS="-L"$DAL"/install/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial -L"$PSRXML"/install/lib" LIBS="-lpgplot -lcpgplot -lpsrxml -lxml2" && \
     make -j $(nproc) && \
     make && \
