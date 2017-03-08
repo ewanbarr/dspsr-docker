@@ -5,7 +5,7 @@
 # as you do not remove the above attribution and reasonably
 # inform receipients that you have modified the original work.
 
-FROM nvidia/cuda:8.0-runtime-ubuntu16.04
+FROM nvidia/cuda:8.0-devel-ubuntu16.04
 
 MAINTAINER Ewan Barr "ebarr@mpifr-bonn.mpg.de"
 
