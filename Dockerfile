@@ -12,8 +12,6 @@ MAINTAINER Ewan Barr "ebarr@mpifr-bonn.mpg.de"
 # Suppress debconf warnings
 ENV DEBIAN_FRONTEND noninteractive
 
-# Switch account to root and adding user accounts and password
-USER root
 RUN echo "root:root" | chpasswd && \
     mkdir -p /root/.ssh
 
@@ -40,6 +38,7 @@ RUN apt-get --no-install-recommends -y install \
     automake \
     autogen \
     libtool \
+    pkg-config \ 
     cmake \
     csh \
     gcc \
@@ -50,7 +49,8 @@ RUN apt-get --no-install-recommends -y install \
     cvs \
     libcfitsio-dev \
     pgplot5 \
-    swig2.0 \    
+    swig2.0 \
+    hwloc \
     python \
     python-dev \
     python-pip \
@@ -103,6 +103,9 @@ ENV PSRHOME $HOME/software
 ENV OSTYPE linux
 RUN mkdir -p $PSRHOME
 WORKDIR $PSRHOME
+
+ENV CUDA_HOME /usr/local/cuda
+ENV CUDA_ROOT /usr/local/cuda 
 
 # Pull all repos
 RUN wget http://www.atnf.csiro.au/people/pulsar/psrcat/downloads/psrcat_pkg.tar.gz && \
@@ -205,7 +208,7 @@ ENV PSRDADA_HOME $PSRHOME/psrdada
 WORKDIR $PSRDADA_HOME
 RUN mkdir build/ && \
     ./bootstrap && \
-    ./configure --prefix=$PSRDADA_HOME/build && \
+    ./configure --prefix=$PSRDADA_HOME/build --with-cuda-include-dir=/usr/local/cuda/include --with-cuda-lib-dir=/usr/local/cuda/lib64 && \
     make && \
     make install && \
     make clean 
@@ -221,7 +224,7 @@ ENV C_INCLUDE_PATH $C_INCLUDE_PATH:$DSPSR/install/include
 WORKDIR $DSPSR
 RUN ./bootstrap && \
     echo "apsr asp bcpm bpsr caspsr cpsr cpsr2 dummy fits kat lbadr lbadr64 lofar_dal lump lwa puma2 sigproc ska1 dada" > backends.list && \
-    ./configure --prefix=$DSPSR/install --x-libraries=/usr/lib/x86_64-linux-gnu CPPFLAGS="-I"$DAL"/install/include -I/usr/include/hdf5/serial" LDFLAGS="-L"$DAL"/install/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial -L"$PSRXML"/install/lib" LIBS="-lpgplot -lcpgplot -lpsrxml -lxml2" && \
+    ./configure --prefix=$DSPSR/install --with-psrdada-dir=$PSRDADA_BUILD --with-cuda-lib-dir=/usr/local/cuda/lib64/ --with-cuda-include-dir=/usr/local/cuda/include/ --x-libraries=/usr/lib/x86_64-linux-gnu CPPFLAGS="-I"$DAL"/install/include -I/usr/include/hdf5/serial -I"$PSRXML"/install/include" LDFLAGS="-L"$DAL"/install/lib -L/usr/lib/x86_64-linux-gnu/hdf5/serial -L"$PSRXML"/install/lib" LIBS="-lpgplot -lcpgplot -lpsrxml -lxml2" && \
     make -j $(nproc) && \
     make && \
     make install
@@ -229,3 +232,4 @@ RUN ./bootstrap && \
 RUN env | awk '{print "export ",$0}' >> $HOME/.profile
 WORKDIR $HOME
 USER root
+
